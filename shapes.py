@@ -347,14 +347,91 @@ def get_random_problem_shape(x: float, y: float, canvas: Canvas) -> float:
         generate_single_problem_flower,
         generate_single_problem_robot,
         generate_single_problem_balloon,
+        generate_single_problem_cat,
+        # generate_single_problem_pig,
     ]
     problem_generator = random.choice(PROBLEM_GENERATORS)
     return problem_generator(x, y, canvas)
-# def generate_single_problem_owl(x_position: float, y_position: float, canvas: Canvas) -> float:
 
-# def generate_single_problem_ice_cream(x_position: float, y_position: float, canvas: Canvas) -> float:
-
-# def generate_single_problem_cloud(x_position: float, y_position: float, canvas: Canvas) -> float:
+def generate_single_problem_pig(x_position: float, y_position: float, canvas: Canvas) -> float:
+    a, b = number_choices()
+    problem = f"{a} + {b}"
+    
+    # Calculate text width and height for positioning
+    text_width = canvas.stringWidth(problem, "Helvetica", 12)
+    text_height = 12  # Font size
+    
+    # Calculate center positions for the pig
+    pig_center_x = x_position + text_width/2
+    pig_center_y = y_position + text_height/4
+    pig_size = 42  # Base size for scaling
+    
+    # Draw the pig face
+    canvas.saveState()
+    canvas.translate(pig_center_x, pig_center_y)
+    
+    # Create main face circle
+    canvas.circle(0, 0, pig_size)
+    
+    # Add pig ears (triangular shapes with curves)
+    # Left ear - moved base point outward and adjusted curve
+    p = canvas.beginPath()
+    p.moveTo(-pig_size*0.85, pig_size*0.4)  # Base point moved more to edge
+    p.curveTo(-pig_size*1.2, pig_size*0.8,   # Control point 1 - more outward
+              -pig_size*1.2, pig_size*1.1,    # Control point 2 - more outward
+              -pig_size*0.5, pig_size*0.7)    # Inner point
+    p.lineTo(-pig_size*0.85, pig_size*0.4)   # Back to base
+    canvas.drawPath(p)
+    
+    # Right ear (mirror of left)
+    p = canvas.beginPath()
+    p.moveTo(pig_size*0.85, pig_size*0.4)    # Base point moved more to edge
+    p.curveTo(pig_size*1.2, pig_size*0.8,    # Control point 1 - more outward
+              pig_size*1.2, pig_size*1.1,     # Control point 2 - more outward
+              pig_size*0.5, pig_size*0.7)     # Inner point
+    p.lineTo(pig_size*0.85, pig_size*0.4)    # Back to base
+    canvas.drawPath(p)
+    
+    # Draw snout (oval) - moved down by adjusting y-coordinates
+    snout_size = pig_size/4
+    canvas.ellipse(-snout_size/1.2, -snout_size/1.5,  # Changed y-coordinate from /1 to /1.5
+                  snout_size/1.2, -snout_size/2.2)     # Changed y-coordinate from /1 to /2.5
+    
+    # Draw nostrils (small circles) - keeping relative position to snout
+    nostril_size = snout_size/4
+    canvas.circle(-nostril_size, -snout_size/1.5, nostril_size/2)
+    canvas.circle(nostril_size, -snout_size/1.5, nostril_size/2)
+    
+    # Draw eyes (circles)
+    eye_radius = pig_size/4.5
+    
+    # Left eye circle
+    canvas.circle(-pig_size/2, pig_size/3, eye_radius)
+    
+    # Right eye circle
+    canvas.circle(pig_size/2, pig_size/3, eye_radius)
+    
+    canvas.restoreState()
+    
+    # Position numbers inside the eyes
+    left_text_offset_x = canvas.stringWidth(str(a), "Helvetica", 12)/2
+    right_text_offset_x = canvas.stringWidth(str(b), "Helvetica", 12)/2
+    text_offset_y = text_height/3
+    
+    # Eye center positions for numbers
+    left_eye_x = pig_center_x - pig_size/2
+    right_eye_x = pig_center_x + pig_size/2
+    eye_y = pig_center_y + pig_size/3
+    
+    # Add plus sign between eyes
+    plus_offset_x = canvas.stringWidth("+", "Helvetica", 12)/2
+    canvas.drawString(pig_center_x - plus_offset_x, eye_y - text_offset_y, "+")
+    
+    # Draw numbers
+    canvas.drawString(left_eye_x - left_text_offset_x, eye_y - text_offset_y, str(a))
+    canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(b))
+    
+    return y_position - 3*cm
 
 def generate_single_problem_balloon(x_position: float, y_position: float, canvas: Canvas) -> float:
     a, b = number_choices()
