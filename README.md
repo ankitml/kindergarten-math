@@ -2,6 +2,9 @@
 Use this to generate a PDF with math problems for kindergarteners.
 Look at examples in the output folder. There is a pdf with each shape that is available. When you run the code it will generate a single pdf with all the shapes picked randomly.
 
+### Sample Output
+[View sample problems (PDF)](outputs/all.pdf)
+
 ### How to run
 ```
 python print.py
