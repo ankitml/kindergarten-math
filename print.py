@@ -7,7 +7,8 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from typing import Tuple, Union
-from shapes import get_random_problem_shape
+from shapes import ShapeFactory
+
 
 
 
@@ -32,13 +33,15 @@ def generate_problems(starting_y_position: float, canvas: Canvas) -> None:
     x_position = 2*cm
     y_position = starting_y_position
     for i in range(1, problems_per_column + 1):
-        y_position = get_random_problem_shape(x_position, y_position, canvas)
-    
+        # y_position = get_random_problem_shape(x_position, y_position, canvas)
+        y_position = ShapeFactory.create_shape(x_position, y_position, canvas)
+
     # Second column
     x_position = 12*cm
     y_position = starting_y_position
     for i in range(1, problems_per_column + 1):
-        y_position = get_random_problem_shape(x_position, y_position, canvas)
+        # y_position = get_random_problem_shape(x_position, y_position, canvas)
+        y_position = ShapeFactory.create_shape(x_position, y_position, canvas)
 
 
 

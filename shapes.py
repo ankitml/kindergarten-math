@@ -1,79 +1,110 @@
 import math
 import random
 from typing import Tuple
+from abc import ABC, abstractmethod
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.units import cm
+from utils import SingleProblemMathProperties, SingleProblemCanvasProperties
 
-def number_choices() -> Tuple[int, int]:
-    a = random.randint(2, 28)
-    b = random.randint(2, 30 - a)
-    return a, b
+TEXT_FONT = "Helvetica"
+TEXT_FONT_SIZE = 12
 
+class MathProblemShape(ABC):
+    """
+    Base class for all math problem shapes. Classes that inherit from this class must implement the draw method to draw the shape.
+    """
+    def __init__(self, math_problem: SingleProblemMathProperties, canvas_properties: SingleProblemCanvasProperties):
+        self.math_problem_properties = math_problem
+        self.canvas_properties = canvas_properties
 
-def generate_single_problem_flower(x_position: float, y_position: float, canvas: Canvas) -> float:
-    a, b = number_choices()
-    problem = f"{a} + {b}"
-    
-    # Calculate text width and height for positioning
-    text_width = canvas.stringWidth(problem, "Helvetica", 12)
-    text_height = 12  # Font size
-    
-    # Calculate center positions for the flower
-    flower_center_x = x_position + text_width/2
-    flower_center_y = y_position + text_height/4
-    flower_size = 55  # Base size for scaling
-    
-    # Draw the flower
-    canvas.saveState()
-    canvas.translate(flower_center_x, flower_center_y)
-    
-    # Draw petals (6 petals around the center)
-    petal_radius = flower_size/3
-    for i in range(6):
-        angle = i * 60  # 360 degrees / 6 petals = 60 degrees per petal
-        rad = angle * 3.14159 / 180
+    # returns the new y position after drawing the shape
+    @abstractmethod
+    def draw(self) -> float:
+        raise NotImplementedError("draw method not implemented")
+
+class Flower(MathProblemShape):
+    def draw(self) -> float:
+        problem = f"{self.math_problem_properties} 
+        canvas = self.canvas_properties.canvas
+        text_width = canvas.stringWidth(problem, TEXT_FONT, TEXT_FONT_SIZE)
+        text_height = TEXT_FONT_SIZE
+        x_position = self.canvas_properties.x_position
+        y_position = self.canvas_properties.y_position
+
+        # Calculate center positions for the flower
+        flower_center_x = x_position + text_width/2
+        flower_center_y = y_position + text_height/4
+        flower_size = 55  # Base size for scaling
         
-        # Increased the multiplier from 0.8 to 1.2 to move petals outward
-        petal_x = petal_radius * 1.99 * math.cos(rad)
-        petal_y = petal_radius * 1.99 * math.sin(rad)
-        
-        # Draw oval petal - made petals slightly larger
+        # Draw the flower
         canvas.saveState()
-        canvas.translate(petal_x, petal_y)
-        canvas.rotate(angle)
-        canvas.ellipse(-petal_radius/1.8, -petal_radius/3.5,  # Adjusted size ratios
-                      petal_radius/1.8, petal_radius/3.5)
+        canvas.translate(flower_center_x, flower_center_y)
+        
+        # Draw petals (6 petals around the center)
+        petal_radius = flower_size/3
+        for i in range(6):
+            angle = i * 60  # 360 degrees / 6 petals = 60 degrees per petal
+            rad = angle * 3.14159 / 180
+            
+            # Increased the multiplier from 0.8 to 1.2 to move petals outward
+            petal_x = petal_radius * 1.99 * math.cos(rad)
+            petal_y = petal_radius * 1.99 * math.sin(rad)
+            
+            # Draw oval petal - made petals slightly larger
+            canvas.saveState()
+            canvas.translate(petal_x, petal_y)
+            canvas.rotate(angle)
+            canvas.ellipse(-petal_radius/1.8, -petal_radius/3.5,  # Adjusted size ratios
+                        petal_radius/1.8, petal_radius/3.5)
+            canvas.restoreState()
+        
+        # Draw center circle
+        center_radius = flower_size/2
+        canvas.circle(0, 0, center_radius)
+        
+        # Draw eyes (circles)
+        eye_spacing = center_radius * 0.8
+        
         canvas.restoreState()
-    
-    # Draw center circle
-    center_radius = flower_size/2
-    canvas.circle(0, 0, center_radius)
-    
-    # Draw eyes (circles)
-    eye_spacing = center_radius * 0.8
-    
-    canvas.restoreState()
-    
-    # Position numbers inside the eyes
-    left_text_offset_x = canvas.stringWidth(str(a), "Helvetica", 12)/2
-    right_text_offset_x = canvas.stringWidth(str(b), "Helvetica", 12)/2
-    text_offset_y = text_height/3
-    
-    # Eye center positions for numbers
-    left_eye_x = flower_center_x - eye_spacing/2
-    right_eye_x = flower_center_x + eye_spacing/2
-    eye_y = flower_center_y
-    
-    # Add plus sign between eyes (moved to be at the same level as numbers)
-    plus_offset_x = canvas.stringWidth("+", "Helvetica", 12)/2
-    canvas.drawString(flower_center_x - plus_offset_x, eye_y - text_offset_y, "+")  # Changed y-position
-    
-    # Draw numbers
-    canvas.drawString(left_eye_x - left_text_offset_x, eye_y - text_offset_y, str(a))
-    canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(b))
-    
-    return y_position - 3*cm
+        
+        # Position numbers inside the eyes
+        left_text_offset_x = canvas.stringWidth(str(a), TEXT_FONT, TEXT_FONT_SIZE)/2
+        right_text_offset_x = canvas.stringWidth(str(b), TEXT_FONT, TEXT_FONT_SIZE)/2
+        text_offset_y = text_height/3
+        
+        # Eye center positions for numbers
+        left_eye_x = flower_center_x - eye_spacing/2
+        right_eye_x = flower_center_x + eye_spacing/2
+        eye_y = flower_center_y
+        
+        # Add plus sign between eyes (moved to be at the same level as numbers)
+        plus_offset_x = canvas.stringWidth(self.math_problem_properties.operator, TEXT_FONT, TEXT_FONT_SIZE)/2
+        canvas.drawString(flower_center_x - plus_offset_x, eye_y - text_offset_y, self.math_problem_properties.operator) 
+        
+        # Draw numbers
+        canvas.drawString(left_eye_x - left_text_offset_x, eye_y - text_offset_y, str(self.math_problem_properties.a))
+        canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(self.math_problem_properties.b))
+        
+        return y_position - 3*cm
 
+class ShapeFactory:
+    SHAPES = {
+        "flower": Flower,
+    }
+
+    @classmethod
+    def create_random_shape(cls, math_problem: SingleProblemMathProperties, canvas_properties: SingleProblemCanvasProperties) -> SingleProblemShape:
+        shape_type = random.choice(list(cls.SHAPES.keys()))
+        shape_class = cls.SHAPES[shape_type]
+        return shape_class(math_problem, canvas_properties).draw()
+
+    @classmethod
+    def create_shape(cls, x_position: float, y_position: float, canvas: Canvas) -> float:
+        math_problem = SingleProblemMathProperties(a, b, operator)
+        canvas_properties = SingleProblemCanvasProperties(x_position, y_position, canvas)
+        return cls.create_random_shape(math_problem, canvas_properties)
+
+"""
 def generate_single_problem_circle(x_position: float, y_position: float, canvas: Canvas) -> float:
     a, b = number_choices()
     problem = f"{a} + {b}"
@@ -499,3 +530,4 @@ def generate_single_problem_balloon(x_position: float, y_position: float, canvas
     canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(b))
     
     return y_position - 3*cm
+"""
