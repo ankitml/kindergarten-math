@@ -303,6 +303,81 @@ class Balloon(MathProblemShape):
         # Add plus sign between eyes
         plus_offset_x = self.canvas.stringWidth("+", "Helvetica", 12)/2
         self.canvas.drawString(self.balloon_center_x - plus_offset_x, self.eye_y - self.text_offset_y, "+")
+
+class Cat(MathProblemShape):
+    def setup_canvas(self) -> None:
+        problem = f"{self.math_problem_properties}"
+        self.canvas = self.canvas_properties.canvas
+        # Calculate text width and height for positioning
+        self.text_width = self.canvas.stringWidth(problem, "Helvetica", 12)
+        self.text_height = 12  # Font size
+        
+        # Calculate center positions for the cat
+        self.cat_center_x = self.canvas_properties.x_position + self.text_width/2
+        self.cat_center_y = self.canvas_properties.y_position + self.text_height/4
+        self.cat_size = 42  # Base size for scaling
+    
+    def draw_outline(self) -> None:
+        # Draw the cat face
+        self.canvas.saveState()
+        self.canvas.translate(self.cat_center_x, self.cat_center_y)
+        # Create main face circle
+        p = self.canvas.beginPath()
+        p.circle(0, 0, self.cat_size)
+        
+        # Left ear (triangle) - starting from face boundary
+        p.moveTo(-self.cat_size*0.85, self.cat_size*0.4)  # Lower base point at circle boundary
+        p.lineTo(-self.cat_size*1.2, self.cat_size*0.9)   # More to the side
+        p.lineTo(-self.cat_size*0.5, self.cat_size*0.7)   # Inner point
+        p.lineTo(-self.cat_size*0.85, self.cat_size*0.4)  # Back to base
+        
+        # Right ear (triangle) - starting from face boundary
+        p.moveTo(self.cat_size*0.85, self.cat_size*0.4)   # Lower base point at circle boundary
+        p.lineTo(self.cat_size*1.2, self.cat_size*0.9)    # More to the side
+        p.lineTo(self.cat_size*0.5, self.cat_size*0.7)    # Inner point
+        p.lineTo(self.cat_size*0.85, self.cat_size*0.4)   # Back to base
+        # Draw the path
+        self.canvas.drawPath(p)
+        # Small triangle nose for plus sign
+        nose_size = self.cat_size * 0.3  
+        nose_path = self.canvas.beginPath()
+        nose_path.moveTo(-nose_size, -nose_size*0.5)
+        nose_path.lineTo(nose_size, -nose_size*0.5)
+        nose_path.lineTo(0, nose_size*0.5)
+        nose_path.lineTo(-nose_size, -nose_size*0.5)
+        self.canvas.drawPath(nose_path)
+        
+
+    def draw_eyes(self, center_radius: float) -> float:
+        # Draw eyes (circles)
+        eye_radius = self.cat_size/4
+        
+        # Left eye circle
+        self.canvas.circle(-self.cat_size*0.4, self.cat_size*0.2, eye_radius)
+        
+        # Right eye circle
+        self.canvas.circle(self.cat_size*0.4, self.cat_size*0.2, eye_radius)
+        self.canvas.restoreState()
+        
+    
+    def draw_numbers(self, eye_spacing: float) -> None:
+        # Position numbers inside the eyes
+        left_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.a), "Helvetica", 12)/2
+        right_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.b), "Helvetica", 12)/2
+        self.text_offset_y = self.text_height/3
+        
+        # Eye center positions for numbers
+        left_eye_x = self.cat_center_x - self.cat_size*0.4
+        right_eye_x = self.cat_center_x + self.cat_size*0.4
+        self.eye_y = self.cat_center_y + self.cat_size*0.2
+        # Draw numbers
+        self.canvas.drawString(left_eye_x - left_text_offset_x, self.eye_y - self.text_offset_y, str(self.math_problem_properties.a))
+        self.canvas.drawString(right_eye_x - right_text_offset_x, self.eye_y - self.text_offset_y, str(self.math_problem_properties.b))
+    
+    def draw_operator(self) -> None:
+        # Add plus sign in the nose area
+        plus_offset_x = self.canvas.stringWidth(self.math_problem_properties.operator, "Helvetica", 12)/2
+        self.canvas.drawString(self.cat_center_x - plus_offset_x, self.cat_center_y - self.text_offset_y, self.math_problem_properties.operator)
     
 class ShapeFactory:
     SHAPES = {
@@ -310,6 +385,7 @@ class ShapeFactory:
         "circle": CircleHumanSimple,
         "robot": Robot,
         "balloon": Balloon,
+        "cat": Cat,
     }
 
     @classmethod
@@ -407,82 +483,6 @@ def generate_single_problem_heart(x_position: float, y_position: float, canvas: 
     
     return y_position - 3*cm
 
-def generate_single_problem_cat(x_position: float, y_position: float, canvas: Canvas) -> float:
-    a, b = number_choices()
-    problem = f"{a} + {b}"
-    
-    # Calculate text width and height for positioning
-    text_width = canvas.stringWidth(problem, "Helvetica", 12)
-    text_height = 12  # Font size
-    
-    # Calculate center positions for the cat
-    cat_center_x = x_position + text_width/2
-    cat_center_y = y_position + text_height/4
-    cat_size = 42  # Base size for scaling
-    
-    # Draw the cat face
-    canvas.saveState()
-    canvas.translate(cat_center_x, cat_center_y)
-    
-    # Create main face circle
-    p = canvas.beginPath()
-    p.circle(0, 0, cat_size)
-    
-    # Left ear (triangle) - starting from face boundary
-    p.moveTo(-cat_size*0.85, cat_size*0.4)  # Lower base point at circle boundary
-    p.lineTo(-cat_size*1.2, cat_size*0.9)   # More to the side
-    p.lineTo(-cat_size*0.5, cat_size*0.7)   # Inner point
-    p.lineTo(-cat_size*0.85, cat_size*0.4)  # Back to base
-    
-    # Right ear (triangle) - starting from face boundary
-    p.moveTo(cat_size*0.85, cat_size*0.4)   # Lower base point at circle boundary
-    p.lineTo(cat_size*1.2, cat_size*0.9)    # More to the side
-    p.lineTo(cat_size*0.5, cat_size*0.7)    # Inner point
-    p.lineTo(cat_size*0.85, cat_size*0.4)   # Back to base
-    
-    # Draw the path
-    canvas.drawPath(p)
-    
-    # Draw eyes (circles)
-    eye_radius = cat_size/4
-    
-    # Left eye circle
-    canvas.circle(-cat_size*0.4, cat_size*0.2, eye_radius)
-    
-    # Right eye circle
-    canvas.circle(cat_size*0.4, cat_size*0.2, eye_radius)
-    
-    # Small triangle nose for plus sign - increased by 30%
-    nose_size = cat_size * 0.3  
-    p = canvas.beginPath()
-    p.moveTo(-nose_size, -nose_size*0.5)
-    p.lineTo(nose_size, -nose_size*0.5)
-    p.lineTo(0, nose_size*0.5)
-    p.lineTo(-nose_size, -nose_size*0.5)
-    canvas.drawPath(p)
-    
-    canvas.restoreState()
-    
-    # Position numbers inside the eyes
-    left_text_offset_x = canvas.stringWidth(str(a), "Helvetica", 12)/2
-    right_text_offset_x = canvas.stringWidth(str(b), "Helvetica", 12)/2
-    text_offset_y = text_height/3
-    
-    # Eye center positions for numbers
-    left_eye_x = cat_center_x - cat_size*0.4
-    right_eye_x = cat_center_x + cat_size*0.4
-    eye_y = cat_center_y + cat_size*0.2
-    
-    # Add plus sign in the nose area
-    plus_offset_x = canvas.stringWidth("+", "Helvetica", 12)/2
-    canvas.drawString(cat_center_x - plus_offset_x, cat_center_y - text_offset_y, "+")
-    
-    # Draw numbers
-    canvas.drawString(left_eye_x - left_text_offset_x, eye_y - text_offset_y, str(a))
-    canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(b))
-    
-    return y_position - 3*cm
-
 def generate_single_problem_pig(x_position: float, y_position: float, canvas: Canvas) -> float:
     a, b = number_choices()
     problem = f" + {b}"
@@ -563,8 +563,4 @@ def generate_single_problem_pig(x_position: float, y_position: float, canvas: Ca
     
     return y_position - 3*cm
 
-def generate_single_problem_balloon(x_position: float, y_position: float, canvas: Canvas) -> float:
-    
-    
-    return y_position - 3*cm
 """
