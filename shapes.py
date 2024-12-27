@@ -238,12 +238,78 @@ class Robot(MathProblemShape):
         plus_offset_x = self.canvas.stringWidth(self.math_problem_properties.operator, "Helvetica", 12)/2
         self.canvas.drawString(self.robot_center_x - plus_offset_x, self.eye_y - text_offset_y, self.math_problem_properties.operator)
     
+
+class Balloon(MathProblemShape):
+    def setup_canvas(self) -> None:
+        problem = f"{self.math_problem_properties}"
+        self.canvas = self.canvas_properties.canvas
         
+        # Calculate text width and height for positioning
+        self.text_width = self.canvas.stringWidth(problem, "Helvetica", 12)
+        self.text_height = 12  # Font size
+        
+        # Calculate center positions for the balloon
+        self.balloon_center_x = self.canvas_properties.x_position + self.text_width/2
+        self.balloon_center_y = self.canvas_properties.y_position + self.text_height/4
+        self.balloon_size = 42  # Base size for scaling
+
+    def draw_outline(self) -> None:
+        # Draw the balloon
+        self.canvas.saveState()
+        self.canvas.translate(self.balloon_center_x, self.balloon_center_y)
+        
+        # Create main balloon shape (wider ellipse)
+        p = self.canvas.beginPath()
+        self.canvas.ellipse(-self.balloon_size/1.67, -self.balloon_size/1.8,  # Increased width by making denominator smaller
+                    self.balloon_size/1.67, self.balloon_size/1.5)      # (from 2 to 1.67, about 20% wider)
+        
+        # Add balloon tie (small triangle)
+        p.moveTo(-self.balloon_size/6, -self.balloon_size/1.8)
+        p.lineTo(self.balloon_size/6, -self.balloon_size/1.8)
+        p.lineTo(0, -self.balloon_size/1.4)
+        p.lineTo(-self.balloon_size/6, -self.balloon_size/1.8)
+        
+        # Add string (curved line)
+        p.moveTo(0, -self.balloon_size/1.4)
+        p.curveTo(
+            -self.balloon_size/3, -self.balloon_size*1.07,  # Control point 1 (reduced by 65%)
+            self.balloon_size/3, -self.balloon_size*1.17,   # Control point 2 (reduced by 65%)
+            0, -self.balloon_size*1.28                 # End point (reduced by 65%)
+        )
+        
+        # Draw the path
+        self.canvas.drawPath(p)
+
+    def draw_eyes(self, center_radius: float) -> float:
+        self.left_eye_x = -self.balloon_size/3
+        self.right_eye_x = self.balloon_size/3
+        self.canvas.restoreState()
+
+    def draw_numbers(self, eye_spacing: float) -> None:
+        left_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.a), "Helvetica", 12)/2
+        right_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.b), "Helvetica", 12)/2
+        # Position numbers inside the eyes
+        self.text_offset_y = self.text_height/3
+        # Eye center positions for numbers
+        left_eye_x = self.balloon_center_x + self.left_eye_x
+        right_eye_x = self.balloon_center_x + self.right_eye_x
+        self.eye_y = self.balloon_center_y + self.balloon_size/4
+        # Draw numbers
+        self.canvas.drawString(left_eye_x - left_text_offset_x, self.eye_y - self.text_offset_y, str(self.math_problem_properties.a))
+        self.canvas.drawString(right_eye_x - right_text_offset_x, self.eye_y - self.text_offset_y, str(self.math_problem_properties.b))
+        
+
+    def draw_operator(self) -> None:
+        # Add plus sign between eyes
+        plus_offset_x = self.canvas.stringWidth("+", "Helvetica", 12)/2
+        self.canvas.drawString(self.balloon_center_x - plus_offset_x, self.eye_y - self.text_offset_y, "+")
+    
 class ShapeFactory:
     SHAPES = {
-        # "flower": Flower,
-        # "circle": CircleHumanSimple,
+        "flower": Flower,
+        "circle": CircleHumanSimple,
         "robot": Robot,
+        "balloon": Balloon,
     }
 
     @classmethod
@@ -498,69 +564,7 @@ def generate_single_problem_pig(x_position: float, y_position: float, canvas: Ca
     return y_position - 3*cm
 
 def generate_single_problem_balloon(x_position: float, y_position: float, canvas: Canvas) -> float:
-    a, b = number_choices()
-    problem = f"{a} + {b}"
     
-    # Calculate text width and height for positioning
-    text_width = canvas.stringWidth(problem, "Helvetica", 12)
-    text_height = 12  # Font size
-    
-    # Calculate center positions for the balloon
-    balloon_center_x = x_position + text_width/2
-    balloon_center_y = y_position + text_height/4
-    balloon_size = 42  # Base size for scaling
-    
-    # Draw the balloon
-    canvas.saveState()
-    canvas.translate(balloon_center_x, balloon_center_y)
-    
-    # Create main balloon shape (wider ellipse)
-    p = canvas.beginPath()
-    canvas.ellipse(-balloon_size/1.67, -balloon_size/1.8,  # Increased width by making denominator smaller
-                  balloon_size/1.67, balloon_size/1.5)      # (from 2 to 1.67, about 20% wider)
-    
-    # Add balloon tie (small triangle)
-    p.moveTo(-balloon_size/6, -balloon_size/1.8)
-    p.lineTo(balloon_size/6, -balloon_size/1.8)
-    p.lineTo(0, -balloon_size/1.4)
-    p.lineTo(-balloon_size/6, -balloon_size/1.8)
-    
-    # Add string (curved line)
-    p.moveTo(0, -balloon_size/1.4)
-    p.curveTo(
-        -balloon_size/3, -balloon_size*1.07,  # Control point 1 (reduced by 65%)
-        balloon_size/3, -balloon_size*1.17,   # Control point 2 (reduced by 65%)
-        0, -balloon_size*1.28                 # End point (reduced by 65%)
-    )
-    
-    # Draw the path
-    canvas.drawPath(p)
-    
-    # Left eye position
-    left_eye_x = -balloon_size/3
-    
-    # Right eye position
-    right_eye_x = balloon_size/3
-    
-    canvas.restoreState()
-    
-    # Position numbers inside the eyes
-    left_text_offset_x = canvas.stringWidth(str(a), "Helvetica", 12)/2
-    right_text_offset_x = canvas.stringWidth(str(b), "Helvetica", 12)/2
-    text_offset_y = text_height/3
-    
-    # Eye center positions for numbers
-    left_eye_x = balloon_center_x + left_eye_x
-    right_eye_x = balloon_center_x + right_eye_x
-    eye_y = balloon_center_y + balloon_size/4
-    
-    # Add plus sign between eyes
-    plus_offset_x = canvas.stringWidth("+", "Helvetica", 12)/2
-    canvas.drawString(balloon_center_x - plus_offset_x, eye_y - text_offset_y, "+")
-    
-    # Draw numbers
-    canvas.drawString(left_eye_x - left_text_offset_x, eye_y - text_offset_y, str(a))
-    canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(b))
     
     return y_position - 3*cm
 """
