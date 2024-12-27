@@ -134,7 +134,6 @@ class CircleHumanSimple(MathProblemShape):
         self.text_width = self.canvas.stringWidth(problem_text, "Helvetica", 12)
         self.text_height = 12  # Font size
         
-        
     def draw_outline(self) -> None:
         # Draw the circular face
         # Calculate center positions for the face
@@ -176,10 +175,75 @@ class CircleHumanSimple(MathProblemShape):
         plus_offset_x = self.canvas.stringWidth(self.math_problem_properties.operator, "Helvetica", 12)/2
         self.canvas.drawString(self.center_x - plus_offset_x, self.center_y - self.text_offset_y, self.math_problem_properties.operator)
 
+class Robot(MathProblemShape):
+    def setup_canvas(self) -> None:
+        problem = f"{self.math_problem_properties}"
+        self.canvas = self.canvas_properties.canvas
+        self.y_position = self.canvas_properties.y_position - .5*cm # move up a bit to make room for the robot head
+        
+        # Calculate text width and height for positioning
+        self.text_width = self.canvas.stringWidth(problem, "Helvetica", 12)
+        self.text_height = 12  # Font size
+
+    def draw_outline(self) -> None:
+        # Calculate center positions for the robot
+        self.robot_center_x = self.canvas_properties.x_position + self.text_width/2
+        self.robot_center_y = self.y_position + self.text_height/4
+        self.robot_size = 42  # Base size for scaling
+        
+        # Draw the robot head
+        self.canvas.saveState()
+        self.canvas.translate(self.robot_center_x, self.robot_center_y)
+        
+        # Create main head rectangle
+        p = self.canvas.beginPath()
+        p.rect(-self.robot_size, -self.robot_size/2, self.robot_size*2, self.robot_size*1.5)
+        
+        # Add antenna
+        p.moveTo(-self.robot_size/4, self.robot_size)
+        p.lineTo(-self.robot_size/4, self.robot_size*1.3)
+        p.lineTo(self.robot_size/4, self.robot_size*1.3)
+        p.lineTo(self.robot_size/4, self.robot_size)
+        self.canvas.drawPath(p)
+
+    def draw_eyes(self, center_radius: float) -> float:
+        # Draw digital-style eyes (rectangles)
+        self.eye_width = self.robot_size/2
+        self.eye_height = self.robot_size/3
+        
+        # Left eye rectangle
+        self.canvas.rect(-self.robot_size*0.7, self.robot_size/4, self.eye_width, self.eye_height)
+        # Right eye rectangle
+        self.canvas.rect(self.robot_size*0.2, self.robot_size/4, self.eye_width, self.eye_height)
+        self.canvas.restoreState()
+        return self.eye_width
+
+    def draw_numbers(self, eye_spacing: float) -> None:
+        # Position numbers inside the digital eyes
+        left_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.a), "Helvetica", 12)/2
+        right_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.b), "Helvetica", 12)/2
+        text_offset_y = self.text_height/3
+        
+        # Eye center positions for numbers
+        left_eye_x = self.robot_center_x - self.robot_size*0.45
+        right_eye_x = self.robot_center_x + self.robot_size*0.45
+        self.eye_y = self.robot_center_y + self.robot_size/4 + self.eye_height/2
+        # Draw numbers
+        self.canvas.drawString(left_eye_x - left_text_offset_x, self.eye_y - text_offset_y, f"{self.math_problem_properties.a}")
+        self.canvas.drawString(right_eye_x - right_text_offset_x, self.eye_y - text_offset_y, f"{self.math_problem_properties.b}")
+
+    def draw_operator(self) -> None:
+        # Add plus sign between eyes
+        text_offset_y = self.text_height/3
+        plus_offset_x = self.canvas.stringWidth(self.math_problem_properties.operator, "Helvetica", 12)/2
+        self.canvas.drawString(self.robot_center_x - plus_offset_x, self.eye_y - text_offset_y, self.math_problem_properties.operator)
+    
+        
 class ShapeFactory:
     SHAPES = {
         # "flower": Flower,
-        "circle": CircleHumanSimple,
+        # "circle": CircleHumanSimple,
+        "robot": Robot,
     }
 
     @classmethod
@@ -277,68 +341,6 @@ def generate_single_problem_heart(x_position: float, y_position: float, canvas: 
     
     return y_position - 3*cm
 
-
-def generate_single_problem_robot(x_position: float, y_position: float, canvas: Canvas) -> float:
-    a, b = number_choices()
-    problem = f"{a} + {b}"
-    y_position = y_position - .5*cm
-    
-    # Calculate text width and height for positioning
-    text_width = canvas.stringWidth(problem, "Helvetica", 12)
-    text_height = 12  # Font size
-    
-    # Calculate center positions for the robot
-    robot_center_x = x_position + text_width/2
-    robot_center_y = y_position + text_height/4
-    robot_size = 42  # Base size for scaling
-    
-    # Draw the robot head
-    canvas.saveState()
-    canvas.translate(robot_center_x, robot_center_y)
-    
-    # Create main head rectangle
-    p = canvas.beginPath()
-    p.rect(-robot_size, -robot_size/2, robot_size*2, robot_size*1.5)
-    
-    # Add antenna
-    p.moveTo(-robot_size/4, robot_size)
-    p.lineTo(-robot_size/4, robot_size*1.3)
-    p.lineTo(robot_size/4, robot_size*1.3)
-    p.lineTo(robot_size/4, robot_size)
-    
-    # Draw the path
-    canvas.drawPath(p)
-    
-    # Draw digital-style eyes (rectangles)
-    eye_width = robot_size/2
-    eye_height = robot_size/3
-    
-    # Left eye rectangle
-    canvas.rect(-robot_size*0.7, robot_size/4, eye_width, eye_height)
-    # Right eye rectangle
-    canvas.rect(robot_size*0.2, robot_size/4, eye_width, eye_height)
-    canvas.restoreState()
-    
-    # Position numbers inside the digital eyes
-    left_text_offset_x = canvas.stringWidth(str(a), "Helvetica", 12)/2
-    right_text_offset_x = canvas.stringWidth(str(b), "Helvetica", 12)/2
-    text_offset_y = text_height/3
-    
-    # Eye center positions for numbers
-    left_eye_x = robot_center_x - robot_size*0.45
-    right_eye_x = robot_center_x + robot_size*0.45
-    eye_y = robot_center_y + robot_size/4 + eye_height/2
-    
-    # Add plus sign between eyes
-    plus_offset_x = canvas.stringWidth("+", "Helvetica", 12)/2
-    canvas.drawString(robot_center_x - plus_offset_x, eye_y - text_offset_y, "+")
-    
-    # Draw numbers
-    canvas.drawString(left_eye_x - left_text_offset_x, eye_y - text_offset_y, str(a))
-    canvas.drawString(right_eye_x - right_text_offset_x, eye_y - text_offset_y, str(b))
-    
-    return y_position - 3*cm
-
 def generate_single_problem_cat(x_position: float, y_position: float, canvas: Canvas) -> float:
     a, b = number_choices()
     problem = f"{a} + {b}"
@@ -415,21 +417,9 @@ def generate_single_problem_cat(x_position: float, y_position: float, canvas: Ca
     
     return y_position - 3*cm
 
-def get_random_problem_shape(x: float, y: float, canvas: Canvas) -> float:
-    PROBLEM_GENERATORS = [
-        generate_single_problem_circle,
-        generate_single_problem_flower,
-        generate_single_problem_robot,
-        generate_single_problem_balloon,
-        generate_single_problem_cat,
-        # generate_single_problem_pig,
-    ]
-    problem_generator = random.choice(PROBLEM_GENERATORS)
-    return problem_generator(x, y, canvas)
-
 def generate_single_problem_pig(x_position: float, y_position: float, canvas: Canvas) -> float:
     a, b = number_choices()
-    problem = f"{a} + {b}"
+    problem = f" + {b}"
     
     # Calculate text width and height for positioning
     text_width = canvas.stringWidth(problem, "Helvetica", 12)
