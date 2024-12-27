@@ -75,6 +75,7 @@ def validate_generated_numbers(a: int, b: int) -> Tuple[int, int]:
         < config["MIN_PROBLEM_ANSWER"]
     ):
         return False
+        print("hi")
     return True
 
 

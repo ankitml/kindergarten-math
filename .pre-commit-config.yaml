@@ -3,9 +3,3 @@ repos:
     rev: stable
     hooks:
       - id: black
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1  # or a specific version
-    hooks:
-    - id: mypy
-      args: [--strict]

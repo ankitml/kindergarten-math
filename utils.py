@@ -23,7 +23,7 @@ class SingleProblemMathProperties:
         self.a, self.b = number_factory()
         self.operator = operator
 
-    def __str__(self):
+    def __str__(self: "SingleProblemMathProperties") -> str:
         return f"{self.a} {self.operator} {self.b}"
 
     def __repr__(self):
