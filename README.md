@@ -1,7 +1,8 @@
 ### Math Practice for Kindergarteners
 Use this to generate a PDF with math problems for kindergarteners.
 Look at examples in the output folder. There is a pdf with each shape that is available. When you run the code it will generate a single pdf with all the shapes picked randomly.
-
+#### Why?
+I have a 5 year old and I wanted to help him with his math. I thought it would be fun to make a program that would generate math problems and print them out. If the kid gets the answer right, she gets to color the shape with her favorite color, if not then she gets to color it with black. 
 ### Sample Output
 ![Sample math problems](output/sample.png)
 
