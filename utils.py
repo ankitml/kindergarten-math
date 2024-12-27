@@ -1,5 +1,5 @@
 import random
-from typing import Tuple
+from typing import Tuple, Callable
 from reportlab.pdfgen.canvas import Canvas
 
 class SingleProblemCanvasProperties:
@@ -11,13 +11,10 @@ class SingleProblemCanvasProperties:
 
 class SingleProblemMathProperties:
     OPERATOR_ENUM = ["+", "-", "*", "/"]
-    def __init__(self, a: int = None, b: int = None, operator: str = "+"):
+    def __init__(self, number_factory: Callable[[], Tuple[int, int]], operator: str = "+"):
         if operator not in self.OPERATOR_ENUM:
             raise ValueError(f"Invalid operator: {operator}. Must be one of {self.OPERATOR_ENUM}")
-        if a is None:
-            a, b = number_choices()
-        self.a = a
-        self.b = b
+        self.a, self.b = number_factory()
         self.operator = operator
 
     
