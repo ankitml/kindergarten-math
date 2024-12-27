@@ -126,9 +126,60 @@ class Flower(MathProblemShape):
         self.draw_numbers(eye_spacing)
         return self.canvas_properties.y_position - 3*cm
 
+class CircleHumanSimple(MathProblemShape):
+    def setup_canvas(self) -> None:
+        problem_text = f"{self.math_problem_properties}"
+        self.canvas = self.canvas_properties.canvas
+        # Calculate text width and height for the oval
+        self.text_width = self.canvas.stringWidth(problem_text, "Helvetica", 12)
+        self.text_height = 12  # Font size
+        
+        
+    def draw_outline(self) -> None:
+        # Draw the circular face
+        # Calculate center positions for the face
+        self.center_x = self.canvas_properties.x_position + self.text_width/2
+        self.center_y = self.canvas_properties.y_position + self.text_height/4
+        face_radius = 42
+        self.canvas.circle(self.center_x, self.center_y, face_radius)
+        return face_radius
+
+    def draw_eyes(self, center_radius: float) -> float:
+        # Eye parameters
+        eye_radius = center_radius/4.5  # Smaller circles for eyes
+        
+        # Left eye position
+        self.left_eye_x = self.center_x - center_radius/2
+        self.left_eye_y = self.center_y + center_radius/3
+        
+        # Right eye position
+        self.right_eye_x = self.center_x + center_radius/2
+        self.right_eye_y = self.center_y + center_radius/3
+        
+        # Draw eye circles
+        self.canvas.circle(self.left_eye_x, self.left_eye_y, eye_radius)
+        self.canvas.circle(self.right_eye_x, self.right_eye_y, eye_radius)
+        return eye_radius
+
+    def draw_numbers(self, eye_spacing: float) -> None:
+        # Position numbers inside the eye circles
+        # Calculate offset based on actual number width
+        left_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.a), "Helvetica", 12)/2
+        right_text_offset_x = self.canvas.stringWidth(str(self.math_problem_properties.b), "Helvetica", 12)/2
+        self.text_offset_y = self.text_height/3  # Vertical adjustment for text centering
+        # Draw numbers
+        self.canvas.drawString(self.left_eye_x - left_text_offset_x, self.left_eye_y - self.text_offset_y, str(self.math_problem_properties.a))
+        self.canvas.drawString(self.right_eye_x - right_text_offset_x, self.right_eye_y - self.text_offset_y, str(self.math_problem_properties.b))
+
+    def draw_operator(self) -> None:
+        # Add plus sign as nose
+        plus_offset_x = self.canvas.stringWidth(self.math_problem_properties.operator, "Helvetica", 12)/2
+        self.canvas.drawString(self.center_x - plus_offset_x, self.center_y - self.text_offset_y, self.math_problem_properties.operator)
+
 class ShapeFactory:
     SHAPES = {
-        "flower": Flower,
+        # "flower": Flower,
+        "circle": CircleHumanSimple,
     }
 
     @classmethod
@@ -144,53 +195,6 @@ class ShapeFactory:
         return cls.create_random_shape(math_problem, canvas_properties)
 
 """
-def generate_single_problem_circle(x_position: float, y_position: float, canvas: Canvas) -> float:
-    a, b = number_choices()
-    problem = f"{a} + {b}"
-    
-    # Calculate text width and height for the oval
-    text_width = canvas.stringWidth(problem, "Helvetica", 12)
-    text_height = 12  # Font size
-    
-    # Calculate center positions for the face
-    face_center_x = x_position + text_width/2
-    face_center_y = y_position + text_height/4
-    face_radius = 42
-    
-    # Draw the circular face
-    canvas.circle(face_center_x, face_center_y, face_radius)
-    
-    # Eye parameters
-    eye_radius = face_radius/4.5  # Smaller circles for eyes
-    
-    # Left eye position
-    left_eye_x = face_center_x - face_radius/2
-    left_eye_y = face_center_y + face_radius/3
-    
-    # Right eye position
-    right_eye_x = face_center_x + face_radius/2
-    right_eye_y = face_center_y + face_radius/3
-    
-    # Draw eye circles
-    canvas.circle(left_eye_x, left_eye_y, eye_radius)
-    canvas.circle(right_eye_x, right_eye_y, eye_radius)
-    
-    
-    # Position numbers inside the eye circles
-    # Calculate offset based on actual number width
-    left_text_offset_x = canvas.stringWidth(str(a), "Helvetica", 12)/2
-    right_text_offset_x = canvas.stringWidth(str(b), "Helvetica", 12)/2
-    text_offset_y = text_height/3  # Vertical adjustment for text centering
-    # Add plus sign as nose
-    plus_offset_x = canvas.stringWidth("+", "Helvetica", 12)/2
-    canvas.drawString(face_center_x - plus_offset_x, face_center_y - text_offset_y, "+")
-    
-    # Draw numbers
-    canvas.drawString(left_eye_x - left_text_offset_x, left_eye_y - text_offset_y, str(a))
-    canvas.drawString(right_eye_x - right_text_offset_x, right_eye_y - text_offset_y, str(b))
-    
-    return y_position - 3*cm
-
 def generate_single_problem_heart(x_position: float, y_position: float, canvas: Canvas) -> float:
     a, b = number_choices()
     problem = f"{a} + {b}"
