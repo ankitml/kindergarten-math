@@ -389,16 +389,10 @@ class ShapeFactory:
     }
 
     @classmethod
-    def create_random_shape(cls, math_problem: MathProblemShape, canvas_properties: SingleProblemCanvasProperties) -> float:
+    def create_shape(cls, math_problem: MathProblemShape, canvas_properties: SingleProblemCanvasProperties) -> float:
         shape_type = random.choice(list(cls.SHAPES.keys()))
         shape_class = cls.SHAPES[shape_type]
         return shape_class(math_problem, canvas_properties).draw()
-
-    @classmethod
-    def create_shape(cls, x_position: float, y_position: float, canvas: Canvas) -> float:
-        math_problem = SingleProblemMathProperties()
-        canvas_properties = SingleProblemCanvasProperties(x_position, y_position, canvas)
-        return cls.create_random_shape(math_problem, canvas_properties)
 
 """
 def generate_single_problem_heart(x_position: float, y_position: float, canvas: Canvas) -> float:

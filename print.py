@@ -8,6 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import cm
 from typing import Tuple, Union
 from shapes import ShapeFactory
+from utils import SingleProblemCanvasProperties, SingleProblemMathProperties
 
 
 
@@ -28,20 +29,25 @@ def generate_addition_pdf(filename: str = "kindergarten_addition.pdf") -> None:
 
 def generate_problems(starting_y_position: float, canvas: Canvas) -> None:
     problems_per_column = 8
-    
+    math_problems = [SingleProblemMathProperties() for _ in range(problems_per_column* 2)]
+    # sort the problems by difficulty
+    math_problems_iter = iter(math_problems)
     # First column
     x_position = 2*cm
     y_position = starting_y_position
     for i in range(1, problems_per_column + 1):
-        # y_position = get_random_problem_shape(x_position, y_position, canvas)
-        y_position = ShapeFactory.create_shape(x_position, y_position, canvas)
+        canvas_properties = SingleProblemCanvasProperties(x_position, y_position, canvas)
+        ShapeFactory.create_shape(next(math_problems_iter), canvas_properties)
+        y_position -= 3*cm # move down by 3cm
+
 
     # Second column
     x_position = 12*cm
     y_position = starting_y_position
     for i in range(1, problems_per_column + 1):
-        # y_position = get_random_problem_shape(x_position, y_position, canvas)
-        y_position = ShapeFactory.create_shape(x_position, y_position, canvas)
+        canvas_properties = SingleProblemCanvasProperties(x_position, y_position, canvas)
+        ShapeFactory.create_shape(next(math_problems_iter), canvas_properties)
+        y_position -= 3*cm # move down by 3cm
 
 
 
